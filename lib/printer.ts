@@ -9,6 +9,7 @@ const PRINTER_PORT = process.env.PRINTER_PORT ?? "9100";
 type PrintOrderItem = {
   name: string;
   quantity: number;
+  toppings?: string[];
 };
 
 type PrintableOrder = {
@@ -52,7 +53,7 @@ export async function printOrder(order: PrintableOrder): Promise<boolean> {
     printer.alignCenter();
     printer.setTextSize(1, 1);
     printer.bold(true);
-    printer.println("Bestellung");
+    printer.println("Sipariş");
     printer.setTextSize(3, 3);
     printer.println(String(order.orderNumber));
     printer.setTextSize(0, 0);
@@ -62,6 +63,9 @@ export async function printOrder(order: PrintableOrder): Promise<boolean> {
     printer.alignLeft();
     for (const item of order.items) {
       printer.println(`${item.quantity}x  ${item.name}`);
+      if (item.toppings && item.toppings.length > 0) {
+        printer.println(`     + ${item.toppings.join(", ")}`);
+      }
     }
 
     printer.newLine();

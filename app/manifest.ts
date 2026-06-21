@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Dergah Bestellung",
+    name: "Dergah Sipariş",
     short_name: "Dergah",
-    description: "Bestellsystem für die Moschee",
+    description: "Cami yemek sipariş sistemi",
     start_url: "/",
     display: "standalone",
     background_color: "#0f172a",

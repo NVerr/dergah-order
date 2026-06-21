@@ -8,27 +8,80 @@ type Category = {
   name: string;
 };
 
+type Topping = {
+  id: string;
+  name: string;
+  price: number;
+};
+
 type Product = {
   id: string;
   name: string;
   description: string | null;
   price: number;
   category: Category;
+  toppings: Topping[];
+  availableDays: string | null;
 };
 
-type CartItem = Product & {
-  quantity: number;
+type SelectedTopping = {
+  name: string;
+  price: number;
 };
+
+type CartItem = {
+  // Eindeutige Warenkorb-Zeile: gleiches Produkt mit unterschiedlichen
+  // Toppings sind unterschiedliche Zeilen.
+  cartItemId: string;
+  productId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  toppings: SelectedTopping[];
+};
+
+const WEEKDAY_BY_INDEX = [
+  "SUNDAY",
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+  "SATURDAY",
+];
+
+function isAvailableToday(product: Product): boolean {
+  if (!product.availableDays) return true;
+  const today = WEEKDAY_BY_INDEX[new Date().getDay()];
+  return product.availableDays.split(",").includes(today);
+}
+
+function buildCartItemId(productId: string, toppings: SelectedTopping[]) {
+  const toppingKey = toppings
+    .map((t) => t.name)
+    .sort()
+    .join("|");
+  return `${productId}::${toppingKey}`;
+}
 
 export default function OrderClient({
   initialProducts,
 }: {
   initialProducts: Product[];
 }) {
-  const [products] = useState<Product[]>(initialProducts);
+  const [products] = useState<Product[]>(
+    initialProducts.filter(isAvailableToday)
+  );
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orderNumber, setOrderNumber] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Produkt, für das gerade der Toppings-Auswahldialog offen ist.
+  const [toppingDialogProduct, setToppingDialogProduct] =
+    useState<Product | null>(null);
+  const [dialogSelectedToppings, setDialogSelectedToppings] = useState<
+    Set<string>
+  >(new Set());
 
   const categories = Array.from(
     new Map(products.map((p) => [p.category.id, p.category])).values()
@@ -38,31 +91,93 @@ export default function OrderClient({
     categories[0]?.id ?? null
   );
 
-  function addToCart(product: Product) {
+  function addToCart(
+    product: Product,
+    selectedToppings: SelectedTopping[] = []
+  ) {
+    const cartItemId = buildCartItemId(product.id, selectedToppings);
+
     setCart((current) => {
-      const existing = current.find((item) => item.id === product.id);
+      const existing = current.find((item) => item.cartItemId === cartItemId);
 
       if (existing) {
         return current.map((item) =>
-          item.id === product.id
+          item.cartItemId === cartItemId
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       }
 
-      return [...current, { ...product, quantity: 1 }];
+      const toppingsTotal = selectedToppings.reduce(
+        (sum, t) => sum + t.price,
+        0
+      );
+
+      return [
+        ...current,
+        {
+          cartItemId,
+          productId: product.id,
+          name: product.name,
+          price: product.price + toppingsTotal,
+          quantity: 1,
+          toppings: selectedToppings,
+        },
+      ];
     });
   }
 
-  function removeFromCart(productId: string) {
+  function handleProductTap(product: Product) {
+    if (product.toppings.length === 0) {
+      addToCart(product);
+      return;
+    }
+    setToppingDialogProduct(product);
+    setDialogSelectedToppings(new Set());
+  }
+
+  function confirmToppingDialog() {
+    if (!toppingDialogProduct) return;
+
+    const selected = toppingDialogProduct.toppings
+      .filter((t) => dialogSelectedToppings.has(t.id))
+      .map((t) => ({ name: t.name, price: t.price }));
+
+    addToCart(toppingDialogProduct, selected);
+    setToppingDialogProduct(null);
+  }
+
+  function toggleDialogTopping(toppingId: string) {
+    setDialogSelectedToppings((current) => {
+      const next = new Set(current);
+      if (next.has(toppingId)) {
+        next.delete(toppingId);
+      } else {
+        next.add(toppingId);
+      }
+      return next;
+    });
+  }
+
+  function removeFromCart(cartItemId: string) {
     setCart((current) =>
       current
         .map((item) =>
-          item.id === productId
+          item.cartItemId === cartItemId
             ? { ...item, quantity: item.quantity - 1 }
             : item
         )
         .filter((item) => item.quantity > 0)
+    );
+  }
+
+  function increment(cartItemId: string) {
+    setCart((current) =>
+      current.map((item) =>
+        item.cartItemId === cartItemId
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      )
     );
   }
 
@@ -85,8 +200,9 @@ export default function OrderClient({
       },
       body: JSON.stringify({
         items: cart.map((item) => ({
-          productId: item.id,
+          productId: item.productId,
           quantity: item.quantity,
+          toppings: item.toppings,
         })),
       }),
     });
@@ -96,7 +212,7 @@ export default function OrderClient({
     setIsSubmitting(false);
 
     if (!res.ok) {
-      alert("Bestellung konnte nicht gespeichert werden.");
+      alert("Sipariş kaydedilemedi.");
       return;
     }
 
@@ -123,7 +239,7 @@ export default function OrderClient({
           </svg>
         </div>
 
-        <p className="text-2xl text-text-muted mb-3">Bestellung aufgegeben</p>
+        <p className="text-2xl text-text-muted mb-3">Siparişiniz alındı</p>
 
         <div className="text-[180px] leading-none font-semibold mb-12 tabular-nums">
           {orderNumber}
@@ -133,7 +249,7 @@ export default function OrderClient({
           onClick={() => setOrderNumber(null)}
           className="bg-menzil-green text-menzil-green-deep text-xl font-semibold rounded-2xl px-10 py-5"
         >
-          Neue Bestellung
+          Yeni sipariş
         </button>
       </main>
     );
@@ -151,12 +267,31 @@ export default function OrderClient({
             className="object-cover"
           />
         </div>
-        <div>
+        <div className="flex-1">
           <h1 className="text-lg font-semibold leading-tight">
             Duisburg-Menzil
           </h1>
-          <p className="text-sm text-text-muted leading-tight">Bestellung</p>
+          <p className="text-sm text-text-muted leading-tight">Sipariş</p>
         </div>
+        <a
+          href="/admin"
+          className="w-9 h-9 rounded-full bg-surface flex items-center justify-center shrink-0 text-text-muted"
+          aria-label="Yönetim"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+        </a>
       </header>
 
       <nav className="flex gap-2.5 px-6 pt-5 pb-1 overflow-x-auto [scrollbar-width:none]">
@@ -179,6 +314,12 @@ export default function OrderClient({
         })}
       </nav>
 
+      {products.length === 0 && (
+        <p className="px-6 pt-10 text-text-muted text-sm">
+          Bugün menüde ürün bulunmuyor.
+        </p>
+      )}
+
       <section className="px-6 pt-5 grid grid-cols-2 gap-3.5">
         {products
           .filter((p) => p.category.id === activeCategory)
@@ -186,7 +327,7 @@ export default function OrderClient({
             <button
               type="button"
               key={product.id}
-              onClick={() => addToCart(product)}
+              onClick={() => handleProductTap(product)}
               className="bg-surface rounded-2xl overflow-hidden text-left active:scale-[0.97] transition-transform"
             >
               <div className="aspect-[6/5] bg-surface-raised flex flex-col items-center justify-center gap-1.5 border-b border-border">
@@ -204,7 +345,7 @@ export default function OrderClient({
                   <path d="m21 15-5-5L5 21" />
                 </svg>
                 <span className="text-[11px] text-text-muted/70">
-                  Foto folgt
+                  Fotoğraf yakında
                 </span>
               </div>
 
@@ -231,22 +372,84 @@ export default function OrderClient({
           ))}
       </section>
 
+      {toppingDialogProduct && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-4">
+          <div className="bg-surface rounded-2xl p-5 w-full max-w-sm">
+            <h2 className="text-lg font-semibold mb-0.5">
+              {toppingDialogProduct.name}
+            </h2>
+            <p className="text-xs text-text-muted mb-4">
+              Ek malzeme seçin (isteğe bağlı)
+            </p>
+
+            <div className="space-y-2 mb-5 max-h-72 overflow-y-auto">
+              {toppingDialogProduct.toppings.map((topping) => {
+                const isChecked = dialogSelectedToppings.has(topping.id);
+                return (
+                  <button
+                    type="button"
+                    key={topping.id}
+                    onClick={() => toggleDialogTopping(topping.id)}
+                    className={`w-full flex items-center justify-between rounded-xl px-4 py-3 text-left ${
+                      isChecked
+                        ? "bg-menzil-green/15 border border-menzil-green"
+                        : "bg-surface-raised border border-transparent"
+                    }`}
+                  >
+                    <span className="text-sm font-medium">
+                      {topping.name}
+                    </span>
+                    <span className="text-xs text-text-muted">
+                      {topping.price > 0
+                        ? `+${topping.price.toFixed(2)} €`
+                        : "ücretsiz"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex gap-2.5">
+              <button
+                type="button"
+                onClick={() => setToppingDialogProduct(null)}
+                className="flex-1 bg-surface-raised text-sm font-medium rounded-xl py-3"
+              >
+                Vazgeç
+              </button>
+              <button
+                type="button"
+                onClick={confirmToppingDialog}
+                className="flex-1 bg-menzil-green text-menzil-green-deep text-sm font-semibold rounded-xl py-3"
+              >
+                Ekle
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {cart.length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 p-3.5 bg-gradient-to-t from-background via-background/95 to-transparent pt-8">
           <div className="bg-surface rounded-2xl p-4 max-w-2xl mx-auto">
             <div className="max-h-40 overflow-y-auto space-y-3 mb-3">
               {cart.map((item) => (
-                <div key={item.id} className="flex items-center gap-3">
+                <div key={item.cartItemId} className="flex items-center gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium truncate">
                       {item.name}
                     </div>
+                    {item.toppings.length > 0 && (
+                      <div className="text-xs text-text-muted truncate">
+                        {item.toppings.map((t) => t.name).join(", ")}
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-2.5 shrink-0">
                     <button
                       type="button"
-                      onClick={() => removeFromCart(item.id)}
+                      onClick={() => removeFromCart(item.cartItemId)}
                       className="w-7 h-7 rounded-lg bg-surface-raised flex items-center justify-center text-base leading-none"
                     >
                       −
@@ -256,7 +459,7 @@ export default function OrderClient({
                     </span>
                     <button
                       type="button"
-                      onClick={() => addToCart(item)}
+                      onClick={() => increment(item.cartItemId)}
                       className="w-7 h-7 rounded-lg bg-surface-raised flex items-center justify-center text-base leading-none"
                     >
                       +
@@ -273,7 +476,7 @@ export default function OrderClient({
             <div className="flex items-center justify-between gap-3 pt-3 border-t border-border">
               <div>
                 <div className="text-xs text-text-muted">
-                  {totalItemCount} Artikel
+                  {totalItemCount} ürün
                 </div>
                 <div className="text-lg font-semibold tabular-nums">
                   {total.toFixed(2)} €
@@ -286,7 +489,7 @@ export default function OrderClient({
                 onClick={submitOrder}
                 className="bg-menzil-green text-menzil-green-deep font-semibold text-sm rounded-xl px-7 py-3.5 disabled:opacity-50"
               >
-                {isSubmitting ? "Wird gespeichert…" : "Bestellung aufgeben"}
+                {isSubmitting ? "Kaydediliyor…" : "Siparişi onayla"}
               </button>
             </div>
           </div>

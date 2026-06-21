@@ -11,6 +11,10 @@ export default async function Page() {
     },
     include: {
       category: true,
+      toppings: {
+        where: { active: true },
+        orderBy: { sortOrder: "asc" },
+      },
     },
   });
 

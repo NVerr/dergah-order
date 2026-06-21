@@ -1,16 +1,22 @@
 import { prisma } from "@/lib/prisma";
 import { printOrder } from "@/lib/printer";
 
+type SelectedTopping = {
+  name: string;
+  price: number;
+};
+
 export async function POST(req: Request) {
   const body = await req.json();
 
   const items = body.items as {
     productId: string;
     quantity: number;
+    toppings?: SelectedTopping[];
   }[];
 
   if (!items || items.length === 0) {
-    return Response.json({ error: "Keine Produkte ausgewählt." }, { status: 400 });
+    return Response.json({ error: "Ürün seçilmedi." }, { status: 400 });
   }
 
   const products = await prisma.product.findMany({
@@ -26,14 +32,18 @@ export async function POST(req: Request) {
     const product = products.find((p: { id: string }) => p.id === item.productId);
 
     if (!product) {
-      throw new Error("Produkt nicht gefunden.");
+      throw new Error("Ürün bulunamadı.");
     }
+
+    const toppings = item.toppings ?? [];
+    const toppingsTotal = toppings.reduce((sum, t) => sum + t.price, 0);
 
     return {
       productId: product.id,
       name: product.name,
-      price: product.price,
+      price: product.price + toppingsTotal,
       quantity: item.quantity,
+      toppings: toppings.length > 0 ? JSON.stringify(toppings) : null,
     };
   });
 
@@ -69,10 +79,15 @@ export async function POST(req: Request) {
   // (die bereits sicher in der Datenbank liegt) nicht gefährden.
   printOrder({
     orderNumber: order.orderNumber,
-    items: order.items.map((item: { name: string; quantity: number }) => ({
-      name: item.name,
-      quantity: item.quantity,
-    })),
+    items: order.items.map(
+      (item: { name: string; quantity: number; toppings: string | null }) => ({
+        name: item.name,
+        quantity: item.quantity,
+        toppings: item.toppings
+          ? (JSON.parse(item.toppings) as SelectedTopping[]).map((t) => t.name)
+          : [],
+      })
+    ),
   }).catch((error) => {
     console.error("[orders] Unerwarteter Fehler beim Druck:", error);
   });
@@ -82,10 +97,11 @@ export async function POST(req: Request) {
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const status = searchParams.get("status");
+  const statusParam = searchParams.get("status");
+  const statuses = statusParam ? statusParam.split(",") : null;
 
   const orders = await prisma.order.findMany({
-    where: status ? { status } : undefined,
+    where: statuses ? { status: { in: statuses } } : undefined,
     include: {
       items: true,
     },

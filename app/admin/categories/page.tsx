@@ -56,10 +56,10 @@ export default function CategoriesPage() {
         >
           <path d="m15 18-6-6 6-6" />
         </svg>
-        Verwaltung
+        Yönetim
       </a>
 
-      <h1 className="text-2xl font-semibold mb-6">Kategorien</h1>
+      <h1 className="text-2xl font-semibold mb-6">Kategoriler</h1>
 
       <form
         onSubmit={createCategory}
@@ -69,18 +69,18 @@ export default function CategoriesPage() {
           className="bg-surface rounded-xl px-4 py-3 flex-1 text-sm placeholder:text-text-muted outline-none focus:ring-2 focus:ring-menzil-green"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Name der Kategorie"
+          placeholder="Kategori adı"
         />
 
         <button className="bg-menzil-green text-menzil-green-deep font-semibold text-sm px-6 rounded-xl">
-          Speichern
+          Kaydet
         </button>
       </form>
 
       <div className="space-y-2 max-w-xl">
         {categories.length === 0 && (
           <p className="text-sm text-text-muted">
-            Noch keine Kategorien angelegt.
+            Henüz kategori eklenmedi.
           </p>
         )}
 

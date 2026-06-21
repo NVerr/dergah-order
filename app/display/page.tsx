@@ -63,13 +63,13 @@ export default function DisplayPage() {
           />
         </div>
         <p className="text-2xl md:text-3xl text-text-muted font-medium tracking-wide">
-          Bitte abholen
+          Lütfen alın
         </p>
       </div>
 
       {!newest && (
         <p className="text-2xl text-text-muted">
-          Noch keine Bestellung bereit.
+          Henüz hazır sipariş yok.
         </p>
       )}
 

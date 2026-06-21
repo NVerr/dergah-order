@@ -27,10 +27,29 @@ model Product {
   image       String?
   active      Boolean @default(true)
 
+  // Leer/null = jeden Tag verfügbar. Sonst kommagetrennte Wochentage,
+  // z. B. "TUESDAY" für reinen Pizza-Dienstag.
+  availableDays String?
+
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id])
 
+  toppings   Topping[]
   orderItems OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Topping {
+  id        String  @id @default(cuid())
+  name      String
+  price     Float   @default(0)
+  active    Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -54,6 +73,12 @@ model OrderItem {
   quantity  Int
   price     Float
   name      String
+
+  // Vom Kunden gewählte Toppings, eingefroren zum Bestellzeitpunkt
+  // (Name + Preis), damit spätere Topping-Änderungen alte Bestellungen
+  // nicht verändern. Gespeichert als JSON-Text, z. B.:
+  // [{"name":"Extra Käse","price":1.0}]
+  toppings  String?
 
   orderId   String
   productId String

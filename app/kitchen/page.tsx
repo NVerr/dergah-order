@@ -6,6 +6,7 @@ type OrderItem = {
   id: string;
   name: string;
   quantity: number;
+  toppings: string | null;
 };
 
 type Order = {
@@ -18,6 +19,16 @@ type Order = {
 
 const POLL_INTERVAL_MS = 3000;
 const HIDE_AFTER_DONE_MS = 5000;
+
+function parseToppings(toppings: string | null): string[] {
+  if (!toppings) return [];
+  try {
+    const parsed = JSON.parse(toppings) as { name: string }[];
+    return parsed.map((t) => t.name);
+  } catch {
+    return [];
+  }
+}
 
 export default function KitchenPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -73,10 +84,10 @@ export default function KitchenPage() {
 
   return (
     <main className="min-h-screen bg-background text-foreground p-6">
-      <h1 className="text-2xl font-semibold mb-6">Küche</h1>
+      <h1 className="text-2xl font-semibold mb-6">Mutfak</h1>
 
       {orders.length === 0 && (
-        <p className="text-text-muted text-lg">Keine offenen Bestellungen.</p>
+        <p className="text-text-muted text-lg">Bekleyen sipariş yok.</p>
       )}
 
       <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
@@ -94,6 +105,11 @@ export default function KitchenPage() {
                 <li key={item.id}>
                   <span className="font-medium">{item.quantity}x</span>{" "}
                   <span className="text-text-muted">{item.name}</span>
+                  {parseToppings(item.toppings).length > 0 && (
+                    <div className="text-xs text-gold pl-5">
+                      + {parseToppings(item.toppings).join(", ")}
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
@@ -102,7 +118,7 @@ export default function KitchenPage() {
               onClick={() => updateStatus(order, "IN_PROGRESS")}
               className="bg-gold text-[#3a2c0f] text-sm font-semibold rounded-xl py-3"
             >
-              Wird zubereitet
+              Hazırlanıyor
             </button>
           </div>
         ))}
@@ -116,7 +132,7 @@ export default function KitchenPage() {
               #{order.orderNumber}
             </div>
             <div className="text-xs font-medium text-gold mb-4 uppercase tracking-wide">
-              Wird zubereitet
+              Hazırlanıyor
             </div>
 
             <ul className="space-y-1.5 flex-1 mb-5 text-sm">
@@ -124,6 +140,11 @@ export default function KitchenPage() {
                 <li key={item.id}>
                   <span className="font-medium">{item.quantity}x</span>{" "}
                   <span className="text-text-muted">{item.name}</span>
+                  {parseToppings(item.toppings).length > 0 && (
+                    <div className="text-xs text-gold pl-5">
+                      + {parseToppings(item.toppings).join(", ")}
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
@@ -132,7 +153,7 @@ export default function KitchenPage() {
               onClick={() => updateStatus(order, "DONE")}
               className="bg-menzil-green text-menzil-green-deep text-sm font-semibold rounded-xl py-3"
             >
-              Fertig
+              Hazır
             </button>
           </div>
         ))}
@@ -145,7 +166,7 @@ export default function KitchenPage() {
             <div className="text-2xl font-semibold mb-1 tabular-nums">
               #{order.orderNumber}
             </div>
-            <div className="text-sm">Fertig ✓</div>
+            <div className="text-sm">Hazır ✓</div>
           </div>
         ))}
       </div>

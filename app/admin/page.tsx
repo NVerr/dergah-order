@@ -1,7 +1,7 @@
 export default function AdminPage() {
   return (
     <main className="min-h-screen bg-background text-foreground p-8">
-      <h1 className="text-2xl font-semibold mb-8">Verwaltung</h1>
+      <h1 className="text-2xl font-semibold mb-8">Yönetim</h1>
 
       <div className="grid grid-cols-2 gap-4 max-w-2xl">
         <a
@@ -23,9 +23,9 @@ export default function AdminPage() {
               <path d="M4 6h16M4 12h16M4 18h7" />
             </svg>
           </div>
-          <div className="text-lg font-medium">Kategorien</div>
+          <div className="text-lg font-medium">Kategoriler</div>
           <div className="text-sm text-text-muted mt-1">
-            Bereiche der Speisekarte verwalten
+            Menü bölümlerini yönet
           </div>
         </a>
 
@@ -49,9 +49,9 @@ export default function AdminPage() {
               <path d="M9 9h6v6H9z" />
             </svg>
           </div>
-          <div className="text-lg font-medium">Produkte</div>
+          <div className="text-lg font-medium">Ürünler</div>
           <div className="text-sm text-text-muted mt-1">
-            Speisen und Getränke verwalten
+            Yiyecek ve içecekleri yönet
           </div>
         </a>
       </div>
