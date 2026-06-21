@@ -32,6 +32,7 @@ export async function POST(req: Request) {
       price: Number(body.price),
       categoryId: body.categoryId,
       active: true,
+      image: body.image || null,
       availableDays:
         availableDays && availableDays.length > 0
           ? availableDays.join(",")

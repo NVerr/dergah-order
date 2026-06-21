@@ -23,11 +23,11 @@ export async function DELETE(
 ) {
   const { id } = await params;
 
-  const productCount = await prisma.product.count({
+  const activeProductCount = await prisma.product.count({
     where: { categoryId: id, active: true },
   });
 
-  if (productCount > 0) {
+  if (activeProductCount > 0) {
     return Response.json(
       {
         error:
@@ -37,8 +37,13 @@ export async function DELETE(
     );
   }
 
-  await prisma.category.delete({
+  // Kategorie nicht hart löschen, sondern deaktivieren – genau wie bei
+  // Produkten. Ein hartes Löschen würde an bereits deaktivierten
+  // Produkten scheitern, die weiterhin per categoryId auf sie verweisen
+  // (wegen vergangener Bestellungen, die diese Produkte referenzieren).
+  await prisma.category.update({
     where: { id },
+    data: { active: false },
   });
 
   return Response.json({ ok: true });

@@ -19,6 +19,7 @@ type Product = {
   name: string;
   description: string | null;
   price: number;
+  image: string | null;
   category: Category;
   toppings: Topping[];
   availableDays: string | null;
@@ -330,23 +331,35 @@ export default function OrderClient({
               onClick={() => handleProductTap(product)}
               className="bg-surface rounded-2xl overflow-hidden text-left active:scale-[0.97] transition-transform"
             >
-              <div className="aspect-[6/5] bg-surface-raised flex flex-col items-center justify-center gap-1.5 border-b border-border">
-                <svg
-                  width="26"
-                  height="26"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  className="text-text-muted/60"
-                >
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                  <circle cx="9" cy="9" r="2" />
-                  <path d="m21 15-5-5L5 21" />
-                </svg>
-                <span className="text-[11px] text-text-muted/70">
-                  Fotoğraf yakında
-                </span>
+              <div className="aspect-[6/5] bg-surface-raised relative border-b border-border">
+                {product.image ? (
+                  <Image
+                    src={product.image}
+                    alt={product.name}
+                    fill
+                    sizes="(max-width: 640px) 50vw, 300px"
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
+                    <svg
+                      width="26"
+                      height="26"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      className="text-text-muted/60"
+                    >
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                      <circle cx="9" cy="9" r="2" />
+                      <path d="m21 15-5-5L5 21" />
+                    </svg>
+                    <span className="text-[11px] text-text-muted/70">
+                      Fotoğraf yakında
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="p-3.5">

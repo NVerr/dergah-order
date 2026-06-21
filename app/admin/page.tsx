@@ -1,31 +1,19 @@
+import PageHeader from "@/components/PageHeader";
+
 export default function AdminPage() {
   return (
-    <main className="min-h-screen bg-background text-foreground p-8">
-      <a
-        href="/"
-        className="text-sm text-text-muted hover:text-foreground inline-flex items-center gap-1.5 mb-6"
-      >
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="m15 18-6-6 6-6" />
-        </svg>
-        Sipariş sayfası
-      </a>
+    <main className="min-h-screen bg-background text-foreground pb-12">
+      <PageHeader
+        title="Yönetim"
+        subtitle="Duisburg-Menzil"
+        backHref="/"
+        backLabel="Sipariş sayfası"
+      />
 
-      <h1 className="text-2xl font-semibold mb-8">Yönetim</h1>
-
-      <div className="grid grid-cols-2 gap-4 max-w-2xl">
+      <div className="grid grid-cols-2 gap-3.5 px-6 pt-6 max-w-2xl">
         <a
           href="/admin/categories"
-          className="bg-surface rounded-2xl p-8 hover:bg-surface-raised transition-colors"
+          className="bg-surface rounded-2xl p-6 active:scale-[0.97] transition-transform"
         >
           <div className="w-10 h-10 rounded-xl bg-menzil-green/15 flex items-center justify-center mb-4">
             <svg
@@ -42,15 +30,15 @@ export default function AdminPage() {
               <path d="M4 6h16M4 12h16M4 18h7" />
             </svg>
           </div>
-          <div className="text-lg font-medium">Kategoriler</div>
-          <div className="text-sm text-text-muted mt-1">
+          <div className="text-base font-medium">Kategoriler</div>
+          <div className="text-xs text-text-muted mt-1">
             Menü bölümlerini yönet
           </div>
         </a>
 
         <a
           href="/admin/products"
-          className="bg-surface rounded-2xl p-8 hover:bg-surface-raised transition-colors"
+          className="bg-surface rounded-2xl p-6 active:scale-[0.97] transition-transform"
         >
           <div className="w-10 h-10 rounded-xl bg-rose/15 flex items-center justify-center mb-4">
             <svg
@@ -68,8 +56,8 @@ export default function AdminPage() {
               <path d="M9 9h6v6H9z" />
             </svg>
           </div>
-          <div className="text-lg font-medium">Ürünler</div>
-          <div className="text-sm text-text-muted mt-1">
+          <div className="text-base font-medium">Ürünler</div>
+          <div className="text-xs text-text-muted mt-1">
             Yiyecek ve içecekleri yönet
           </div>
         </a>

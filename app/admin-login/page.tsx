@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -56,6 +57,16 @@ export default function AdminLoginPage() {
           </svg>
           Sipariş sayfası
         </a>
+
+        <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center overflow-hidden relative mb-4">
+          <Image
+            src="/logo.png"
+            alt="Logo Duisburg-Menzil e.V."
+            fill
+            sizes="48px"
+            className="object-cover"
+          />
+        </div>
 
         <h1 className="text-xl font-semibold mb-1">Yönetim</h1>
         <p className="text-sm text-text-muted mb-6">

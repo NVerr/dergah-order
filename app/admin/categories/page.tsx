@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import PageHeader from "@/components/PageHeader";
 
 type Category = {
   id: string;
@@ -85,28 +86,14 @@ export default function CategoriesPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-background text-foreground p-8">
-      <a
-        href="/admin"
-        className="text-sm text-text-muted hover:text-foreground inline-flex items-center gap-1.5 mb-6"
-      >
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="m15 18-6-6 6-6" />
-        </svg>
-        Yönetim
-      </a>
+    <main className="min-h-screen bg-background text-foreground pb-12">
+      <PageHeader
+        title="Kategoriler"
+        backHref="/admin"
+        backLabel="Yönetim"
+      />
 
-      <h1 className="text-2xl font-semibold mb-6">Kategoriler</h1>
-
+      <div className="px-6 pt-6">
       <form onSubmit={createCategory} className="mb-8 flex gap-3 max-w-xl">
         <input
           className="bg-surface rounded-xl px-4 py-3 flex-1 text-sm placeholder:text-text-muted outline-none focus:ring-2 focus:ring-menzil-green"
@@ -213,6 +200,7 @@ export default function CategoriesPage() {
             </div>
           );
         })}
+      </div>
       </div>
     </main>
   );
