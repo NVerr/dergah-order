@@ -67,7 +67,6 @@ export default function OrderClient({
   );
 
 async function submitOrder() {
-  alert("Button wurde geklickt. Warenkorb: " + cart.length);
   if (cart.length === 0 || isSubmitting) return;
 
   setIsSubmitting(true);
@@ -119,10 +118,7 @@ if (orderNumber) {
 
   return (
     <main className="min-h-screen bg-neutral-950 text-white p-6">
-      <h1 className="text-5xl font-bold mb-8">Bestellung Test</h1>
-      <p className="text-xl mb-4">
-  Produkte geladen: {products.length}
-</p>
+      <h1 className="text-5xl font-bold mb-8">Dergah – Bestellung</h1>
 
       <div className="grid grid-cols-[1fr_380px] gap-6">
         <section className="space-y-10">
@@ -137,10 +133,7 @@ if (orderNumber) {
                   <button
                     type="button"
                     key={product.id}
-                    onClick={() => {
-                      alert("Produkt geklickt: " + product.name);
-                      addToCart(product);
-                    }}
+                    onClick={() => addToCart(product)}
                     className="bg-white text-black rounded-3xl p-8 text-left active:scale-95"
                   >
                     <div className="text-3xl font-bold">{product.name}</div>
@@ -206,15 +199,12 @@ if (orderNumber) {
             Summe: {total.toFixed(2)} €
           </div>
 
-          <div className="text-red-600 text-xl mt-4">
-            Cart: {cart.length} | Submit: {String(isSubmitting)}
-          </div>
           <button
-            disabled={false}
+            disabled={cart.length === 0 || isSubmitting}
             onClick={submitOrder}
             className="mt-6 w-full bg-green-700 text-white text-2xl font-bold rounded-2xl p-5 disabled:bg-neutral-400"
           >
-            {isSubmitting ? "Wird gespeichert..." : "TEST BESTELLUNG AUFGEBEN"}
+            {isSubmitting ? "Wird gespeichert..." : "Bestellung aufgeben"}
           </button>
         </aside>
       </div>

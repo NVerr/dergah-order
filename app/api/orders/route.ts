@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   });
 
   const orderItems = items.map((item) => {
-    const product = products.find((p) => p.id === item.productId);
+    const product = products.find((p: { id: string }) => p.id === item.productId);
 
     if (!product) {
       throw new Error("Produkt nicht gefunden.");
@@ -66,13 +66,17 @@ export async function POST(req: Request) {
   return Response.json(order);
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const status = searchParams.get("status");
+
   const orders = await prisma.order.findMany({
+    where: status ? { status } : undefined,
     include: {
       items: true,
     },
     orderBy: {
-      createdAt: "desc",
+      createdAt: "asc",
     },
   });
 
