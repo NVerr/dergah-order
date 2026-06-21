@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reiner JS Test</title>
+</head>
+<body style="padding: 40px; font-size: 24px; font-family: sans-serif;">
+  <p id="output">Zähler: 0</p>
+  <button id="btn" style="font-size: 24px; padding: 20px 40px; background: green; color: white;">
+    Klick mich (reines JS)
+  </button>
+
+  <script>
+    var count = 0;
+    document.getElementById('btn').addEventListener('click', function () {
+      count = count + 1;
+      document.getElementById('output').textContent = 'Zähler: ' + count;
+    });
+  </script>
+</body>
+</html>
