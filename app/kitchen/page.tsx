@@ -25,7 +25,7 @@ export default function KitchenPage() {
 
   const fetchOrders = useCallback(async () => {
     try {
-      const res = await fetch("/api/orders?status=OPEN");
+      const res = await fetch("/api/orders?status=OPEN,IN_PROGRESS");
       if (!res.ok) return;
       const data: Order[] = await res.json();
       setOrders(data);
@@ -40,27 +40,36 @@ export default function KitchenPage() {
     return () => clearInterval(interval);
   }, [fetchOrders]);
 
-  async function markDone(order: Order) {
-    // Bestellung sofort aus der offenen Liste nehmen (optimistisch),
-    // damit die Küche kein Warten auf den Server spürt.
-    setOrders((current) => current.filter((o) => o.id !== order.id));
-    setRecentlyDone((current) => [...current, order]);
+  async function updateStatus(order: Order, status: "IN_PROGRESS" | "DONE") {
+    // Lokal sofort aktualisieren (optimistisch), damit die Küche
+    // kein Warten auf den Server spürt.
+    if (status === "DONE") {
+      setOrders((current) => current.filter((o) => o.id !== order.id));
+      setRecentlyDone((current) => [...current, order]);
 
-    setTimeout(() => {
-      setRecentlyDone((current) => current.filter((o) => o.id !== order.id));
-    }, HIDE_AFTER_DONE_MS);
+      setTimeout(() => {
+        setRecentlyDone((current) => current.filter((o) => o.id !== order.id));
+      }, HIDE_AFTER_DONE_MS);
+    } else {
+      setOrders((current) =>
+        current.map((o) => (o.id === order.id ? { ...o, status } : o))
+      );
+    }
 
     try {
       await fetch(`/api/orders/${order.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "DONE" }),
+        body: JSON.stringify({ status }),
       });
     } catch {
       // Falls der Server-Request fehlschlägt, holt der nächste Poll
-      // die Bestellung automatisch wieder zurück in die offene Liste.
+      // den korrekten Stand automatisch wieder zurück.
     }
   }
+
+  const openOrders = orders.filter((o) => o.status === "OPEN");
+  const inProgressOrders = orders.filter((o) => o.status === "IN_PROGRESS");
 
   return (
     <main className="min-h-screen bg-neutral-950 text-white p-6">
@@ -73,7 +82,7 @@ export default function KitchenPage() {
       )}
 
       <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
-        {orders.map((order) => (
+        {openOrders.map((order) => (
           <div
             key={order.id}
             className="bg-white text-black rounded-3xl p-6 flex flex-col"
@@ -92,7 +101,37 @@ export default function KitchenPage() {
             </ul>
 
             <button
-              onClick={() => markDone(order)}
+              onClick={() => updateStatus(order, "IN_PROGRESS")}
+              className="bg-amber-600 text-white text-xl font-bold rounded-2xl p-4"
+            >
+              Wird zubereitet
+            </button>
+          </div>
+        ))}
+
+        {inProgressOrders.map((order) => (
+          <div
+            key={order.id}
+            className="bg-amber-50 text-black rounded-3xl p-6 flex flex-col border-4 border-amber-500"
+          >
+            <div className="text-3xl font-black mb-1">
+              #{order.orderNumber}
+            </div>
+            <div className="text-sm font-bold text-amber-700 mb-4 uppercase tracking-wide">
+              Wird zubereitet
+            </div>
+
+            <ul className="space-y-2 flex-1 mb-6">
+              {order.items.map((item) => (
+                <li key={item.id} className="text-xl">
+                  <span className="font-bold">{item.quantity}x</span>{" "}
+                  {item.name}
+                </li>
+              ))}
+            </ul>
+
+            <button
+              onClick={() => updateStatus(order, "DONE")}
               className="bg-green-700 text-white text-xl font-bold rounded-2xl p-4"
             >
               Fertig

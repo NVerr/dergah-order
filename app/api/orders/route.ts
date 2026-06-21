@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { printOrder } from "@/lib/printer";
 
 export async function POST(req: Request) {
   const body = await req.json();
@@ -61,6 +62,19 @@ export async function POST(req: Request) {
     include: {
       items: true,
     },
+  });
+
+  // Druck im Hintergrund anstoßen: der Besucher soll nicht auf den
+  // Druckvorgang warten müssen, und ein Druckfehler darf die Bestellung
+  // (die bereits sicher in der Datenbank liegt) nicht gefährden.
+  printOrder({
+    orderNumber: order.orderNumber,
+    items: order.items.map((item: { name: string; quantity: number }) => ({
+      name: item.name,
+      quantity: item.quantity,
+    })),
+  }).catch((error) => {
+    console.error("[orders] Unerwarteter Fehler beim Druck:", error);
   });
 
   return Response.json(order);

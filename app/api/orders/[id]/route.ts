@@ -9,7 +9,7 @@ export async function PATCH(
 
   const status = body.status as string;
 
-  if (status !== "OPEN" && status !== "DONE") {
+  if (status !== "OPEN" && status !== "IN_PROGRESS" && status !== "DONE") {
     return Response.json({ error: "Ungültiger Status." }, { status: 400 });
   }
 
