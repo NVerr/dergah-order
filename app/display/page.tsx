@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState, useCallback } from "react";
 
 type Order = {
@@ -50,19 +51,30 @@ export default function DisplayPage() {
   const [newest, ...older] = readyOrders;
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-white flex flex-col items-center justify-center p-8">
-      <p className="text-3xl md:text-4xl text-neutral-400 font-bold mb-6 tracking-wide">
-        Bitte abholen
-      </p>
+    <main className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-8">
+      <div className="flex items-center gap-3 mb-10">
+        <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center overflow-hidden shrink-0 relative">
+          <Image
+            src="/logo.png"
+            alt="Logo Duisburg-Menzil e.V."
+            fill
+            sizes="48px"
+            className="object-cover"
+          />
+        </div>
+        <p className="text-2xl md:text-3xl text-text-muted font-medium tracking-wide">
+          Bitte abholen
+        </p>
+      </div>
 
       {!newest && (
-        <p className="text-3xl text-neutral-600">
+        <p className="text-2xl text-text-muted">
           Noch keine Bestellung bereit.
         </p>
       )}
 
       {newest && (
-        <div className="text-[220px] md:text-[260px] font-black leading-none mb-12">
+        <div className="text-[220px] md:text-[260px] font-semibold leading-none mb-12 text-menzil-green tabular-nums">
           {newest.orderNumber}
         </div>
       )}
@@ -72,7 +84,7 @@ export default function DisplayPage() {
           {older.map((order) => (
             <div
               key={order.id}
-              className="text-7xl font-bold text-neutral-500"
+              className="text-6xl font-semibold text-text-muted tabular-nums"
             >
               {order.orderNumber}
             </div>

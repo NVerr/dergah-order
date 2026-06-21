@@ -72,37 +72,35 @@ export default function KitchenPage() {
   const inProgressOrders = orders.filter((o) => o.status === "IN_PROGRESS");
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-white p-6">
-      <h1 className="text-4xl font-bold mb-8">Küche</h1>
+    <main className="min-h-screen bg-background text-foreground p-6">
+      <h1 className="text-2xl font-semibold mb-6">Küche</h1>
 
       {orders.length === 0 && (
-        <p className="text-neutral-500 text-2xl">
-          Keine offenen Bestellungen.
-        </p>
+        <p className="text-text-muted text-lg">Keine offenen Bestellungen.</p>
       )}
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
         {openOrders.map((order) => (
           <div
             key={order.id}
-            className="bg-white text-black rounded-3xl p-6 flex flex-col"
+            className="bg-surface rounded-2xl p-5 flex flex-col"
           >
-            <div className="text-3xl font-black mb-4">
+            <div className="text-2xl font-semibold mb-3 tabular-nums">
               #{order.orderNumber}
             </div>
 
-            <ul className="space-y-2 flex-1 mb-6">
+            <ul className="space-y-1.5 flex-1 mb-5 text-sm">
               {order.items.map((item) => (
-                <li key={item.id} className="text-xl">
-                  <span className="font-bold">{item.quantity}x</span>{" "}
-                  {item.name}
+                <li key={item.id}>
+                  <span className="font-medium">{item.quantity}x</span>{" "}
+                  <span className="text-text-muted">{item.name}</span>
                 </li>
               ))}
             </ul>
 
             <button
               onClick={() => updateStatus(order, "IN_PROGRESS")}
-              className="bg-amber-600 text-white text-xl font-bold rounded-2xl p-4"
+              className="bg-gold text-[#3a2c0f] text-sm font-semibold rounded-xl py-3"
             >
               Wird zubereitet
             </button>
@@ -112,27 +110,27 @@ export default function KitchenPage() {
         {inProgressOrders.map((order) => (
           <div
             key={order.id}
-            className="bg-amber-50 text-black rounded-3xl p-6 flex flex-col border-4 border-amber-500"
+            className="bg-surface rounded-2xl p-5 flex flex-col border border-gold/40"
           >
-            <div className="text-3xl font-black mb-1">
+            <div className="text-2xl font-semibold mb-0.5 tabular-nums">
               #{order.orderNumber}
             </div>
-            <div className="text-sm font-bold text-amber-700 mb-4 uppercase tracking-wide">
+            <div className="text-xs font-medium text-gold mb-4 uppercase tracking-wide">
               Wird zubereitet
             </div>
 
-            <ul className="space-y-2 flex-1 mb-6">
+            <ul className="space-y-1.5 flex-1 mb-5 text-sm">
               {order.items.map((item) => (
-                <li key={item.id} className="text-xl">
-                  <span className="font-bold">{item.quantity}x</span>{" "}
-                  {item.name}
+                <li key={item.id}>
+                  <span className="font-medium">{item.quantity}x</span>{" "}
+                  <span className="text-text-muted">{item.name}</span>
                 </li>
               ))}
             </ul>
 
             <button
               onClick={() => updateStatus(order, "DONE")}
-              className="bg-green-700 text-white text-xl font-bold rounded-2xl p-4"
+              className="bg-menzil-green text-menzil-green-deep text-sm font-semibold rounded-xl py-3"
             >
               Fertig
             </button>
@@ -142,12 +140,12 @@ export default function KitchenPage() {
         {recentlyDone.map((order) => (
           <div
             key={order.id}
-            className="bg-green-900 text-white rounded-3xl p-6 opacity-60"
+            className="bg-menzil-green-deep rounded-2xl p-5 opacity-60"
           >
-            <div className="text-3xl font-black mb-2">
+            <div className="text-2xl font-semibold mb-1 tabular-nums">
               #{order.orderNumber}
             </div>
-            <div className="text-xl">Fertig ✓</div>
+            <div className="text-sm">Fertig ✓</div>
           </div>
         ))}
       </div>

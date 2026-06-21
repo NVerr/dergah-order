@@ -39,29 +39,55 @@ export default function CategoriesPage() {
   }, []);
 
   return (
-    <main className="max-w-4xl mx-auto p-10">
-      <h1 className="text-4xl font-bold mb-8">
-        Kategorien
-      </h1>
+    <main className="min-h-screen bg-background text-foreground p-8">
+      <a
+        href="/admin"
+        className="text-sm text-text-muted hover:text-foreground inline-flex items-center gap-1.5 mb-6"
+      >
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+        Verwaltung
+      </a>
 
-      <form onSubmit={createCategory} className="mb-8 flex gap-4">
+      <h1 className="text-2xl font-semibold mb-6">Kategorien</h1>
+
+      <form
+        onSubmit={createCategory}
+        className="mb-8 flex gap-3 max-w-xl"
+      >
         <input
-          className="border p-4 rounded-xl flex-1"
+          className="bg-surface rounded-xl px-4 py-3 flex-1 text-sm placeholder:text-text-muted outline-none focus:ring-2 focus:ring-menzil-green"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Kategorie"
+          placeholder="Name der Kategorie"
         />
 
-        <button className="bg-black text-white px-8 rounded-xl">
+        <button className="bg-menzil-green text-menzil-green-deep font-semibold text-sm px-6 rounded-xl">
           Speichern
         </button>
       </form>
 
-      <div className="space-y-3">
+      <div className="space-y-2 max-w-xl">
+        {categories.length === 0 && (
+          <p className="text-sm text-text-muted">
+            Noch keine Kategorien angelegt.
+          </p>
+        )}
+
         {categories.map((cat) => (
           <div
             key={cat.id}
-            className="border rounded-xl p-5 text-xl"
+            className="bg-surface rounded-xl px-4 py-3.5 text-sm font-medium"
           >
             {cat.name}
           </div>

@@ -68,12 +68,34 @@ export default function ProductsPage() {
   }, []);
 
   return (
-    <main className="max-w-5xl mx-auto p-10">
-      <h1 className="text-4xl font-bold mb-8">Produkte</h1>
+    <main className="min-h-screen bg-background text-foreground p-8">
+      <a
+        href="/admin"
+        className="text-sm text-text-muted hover:text-foreground inline-flex items-center gap-1.5 mb-6"
+      >
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+        Verwaltung
+      </a>
 
-      <form onSubmit={createProduct} className="border rounded-2xl p-6 mb-10 grid gap-4">
+      <h1 className="text-2xl font-semibold mb-6">Produkte</h1>
+
+      <form
+        onSubmit={createProduct}
+        className="bg-surface rounded-2xl p-6 mb-10 grid gap-3 max-w-xl"
+      >
         <input
-          className="border p-4 rounded-xl"
+          className="bg-surface-raised rounded-xl px-4 py-3 text-sm placeholder:text-text-muted outline-none focus:ring-2 focus:ring-menzil-green"
           placeholder="Produktname"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -81,22 +103,23 @@ export default function ProductsPage() {
         />
 
         <textarea
-          className="border p-4 rounded-xl"
-          placeholder="Beschreibung optional"
+          className="bg-surface-raised rounded-xl px-4 py-3 text-sm placeholder:text-text-muted outline-none focus:ring-2 focus:ring-menzil-green resize-none"
+          placeholder="Beschreibung (optional)"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          rows={2}
         />
 
         <input
-          className="border p-4 rounded-xl"
-          placeholder="Preis z. B. 5.50"
+          className="bg-surface-raised rounded-xl px-4 py-3 text-sm placeholder:text-text-muted outline-none focus:ring-2 focus:ring-menzil-green"
+          placeholder="Preis, z. B. 5.50"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
           required
         />
 
         <select
-          className="border p-4 rounded-xl"
+          className="bg-surface-raised rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-menzil-green"
           value={categoryId}
           onChange={(e) => setCategoryId(e.target.value)}
           required
@@ -108,19 +131,35 @@ export default function ProductsPage() {
           ))}
         </select>
 
-        <button className="bg-black text-white rounded-xl p-4">
+        <button className="bg-menzil-green text-menzil-green-deep font-semibold text-sm rounded-xl py-3 mt-1">
           Produkt speichern
         </button>
       </form>
 
-      <div className="grid gap-4">
+      <div className="grid gap-3 max-w-xl">
+        {products.length === 0 && (
+          <p className="text-sm text-text-muted">
+            Noch keine Produkte angelegt.
+          </p>
+        )}
+
         {products.map((product) => (
-          <div key={product.id} className="border rounded-xl p-5">
-            <div className="text-2xl font-bold">{product.name}</div>
-            <div>{product.category.name}</div>
-            <div>{product.price.toFixed(2)} €</div>
+          <div key={product.id} className="bg-surface rounded-xl p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-base font-medium">{product.name}</div>
+                <div className="text-xs text-text-muted mt-0.5">
+                  {product.category.name}
+                </div>
+              </div>
+              <div className="text-base font-semibold text-rose shrink-0">
+                {product.price.toFixed(2)} €
+              </div>
+            </div>
             {product.description && (
-              <div className="text-gray-500">{product.description}</div>
+              <div className="text-sm text-text-muted mt-2">
+                {product.description}
+              </div>
             )}
           </div>
         ))}
