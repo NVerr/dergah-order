@@ -1,19 +1,30 @@
 @import "tailwindcss";
 
-:root {
-  --background: #121212;
-  --foreground: #f5f3ee;
-
-  --color-surface: #1c1c1c;
-  --color-surface-raised: #262626;
-
+:root,
+[data-theme="light"] {
+  --background: #f5f3ee;
+  --foreground: #121212;
+  --color-surface: #ffffff;
+  --color-surface-raised: #ebebeb;
+  --color-text-muted: #6b6560;
+  --color-border: #d8d5d0;
   --color-menzil-green: #2f9e5c;
   --color-menzil-green-deep: #1d4f30;
   --color-rose: #e23b34;
   --color-gold: #d4af6a;
+}
 
+[data-theme="dark"] {
+  --background: #121212;
+  --foreground: #f5f3ee;
+  --color-surface: #1c1c1c;
+  --color-surface-raised: #262626;
   --color-text-muted: #9a958c;
   --color-border: #2e2e2e;
+  --color-menzil-green: #2f9e5c;
+  --color-menzil-green-deep: #1d4f30;
+  --color-rose: #e23b34;
+  --color-gold: #d4af6a;
 }
 
 @theme inline {
@@ -36,8 +47,6 @@ body {
   color: var(--foreground);
 }
 
-/* iOS Safari erkennt Touch-Events auf Elementen manchmal nur zuverlässig,
-   wenn cursor:pointer explizit gesetzt ist – auch bei <button>. */
 button {
   cursor: pointer;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);

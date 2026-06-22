@@ -1,15 +1,18 @@
 import Image from "next/image";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function PageHeader({
   title,
   subtitle,
   backHref,
   backLabel,
+  actionHref,
 }: {
   title: string;
   subtitle?: string;
   backHref?: string;
   backLabel?: string;
+  actionHref?: string;
 }) {
   return (
     <header className="px-6 pt-6">
@@ -47,11 +50,31 @@ export default function PageHeader({
         <div className="flex-1 min-w-0">
           <h1 className="text-lg font-semibold leading-tight">{title}</h1>
           {subtitle && (
-            <p className="text-sm text-text-muted leading-tight">
-              {subtitle}
-            </p>
+            <p className="text-sm text-text-muted leading-tight">{subtitle}</p>
           )}
         </div>
+        <ThemeToggle />
+        
+        {actionHref && (
+          <a
+            href={actionHref}
+            className="w-10 h-10 rounded-full bg-menzil-green flex items-center justify-center shrink-0"
+            aria-label="Yeni ekle"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="black"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </a>
+        )}
       </div>
     </header>
   );

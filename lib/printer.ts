@@ -54,6 +54,7 @@ export async function printOrder(order: PrintableOrder): Promise<boolean> {
     printer.setTextSize(1, 1);
     printer.bold(true);
     printer.println("Siparis");
+    printer.newLine();
     printer.setTextSize(3, 3);
     printer.println(String(order.orderNumber));
     printer.setTextSize(0, 0);

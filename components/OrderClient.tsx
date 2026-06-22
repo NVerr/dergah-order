@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { useTheme } from "@/components/ThemeProvider";
+import ThemeToggle from "@/components/ThemeToggle";
 
 type Category = {
   id: string;
@@ -91,7 +93,8 @@ export default function OrderClient({
   const [showPaymentConfirm, setShowPaymentConfirm] = useState(false);
 
   // ── Punkt 3: Hell/Dunkel-Modus ──
-  const [isDark, setIsDark] = useState(true);
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
 
   const [toppingDialogProduct, setToppingDialogProduct] =
     useState<Product | null>(null);
@@ -287,7 +290,7 @@ export default function OrderClient({
         <button
           onClick={() => setOrderNumber(null)}
           className="text-xl font-semibold rounded-2xl px-10 py-5"
-          style={{ background: "#2f9e5c", color: "#1d4f30" }}
+          style={{ background: "#2f9e5c", color: "#000000" }}
         >
           Yeni sipariş
         </button>
@@ -326,7 +329,7 @@ export default function OrderClient({
         {/* ── Punkt 3: Hell/Dunkel Toggle ── */}
         <button
           type="button"
-          onClick={() => setIsDark(!isDark)}
+          onClick={toggleTheme}
           className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
           style={{ background: "var(--surface)", color: "var(--text-muted)" }}
           aria-label={isDark ? "Açık tema" : "Koyu tema"}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import ConnectionStatus from "@/components/ConnectionStatus";
+import ThemeProvider from "@/components/ThemeProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Dergah Sipariş",
-  description: "Cami yemek sipariş sistemi",
+  title: "Dergah Siparis",
+  description: "Cami yemek siparis sistemi",
 };
 
 export default function RootLayout({
@@ -29,8 +30,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ConnectionStatus />
-        {children}
+        <ThemeProvider>
+          <ConnectionStatus />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

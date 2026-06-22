@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import PageHeader from "@/components/PageHeader";
 import ImagePicker, { uploadImage } from "@/components/ImagePicker";
 
@@ -39,7 +39,7 @@ const WEEKDAYS: { value: string; label: string }[] = [
 ];
 
 function formatDays(availableDays: string | null): string {
-  if (!availableDays) return "Her gün";
+  if (!availableDays) return "Her gun";
   const selected = availableDays.split(",");
   return WEEKDAYS.filter((d) => selected.includes(d.value))
     .map((d) => d.label)
@@ -85,19 +85,7 @@ export default function ProductsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
 
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const [selectedDays, setSelectedDays] = useState<string[]>([]);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const [editingProductId, setEditingProductId] = useState<string | null>(
-    null
-  );
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editPrice, setEditPrice] = useState("");
@@ -107,80 +95,17 @@ export default function ProductsPage() {
   const [editIsUploading, setEditIsUploading] = useState(false);
   const [editUploadError, setEditUploadError] = useState<string | null>(null);
 
-  const [expandedToppingsId, setExpandedToppingsId] = useState<string | null>(
-    null
-  );
+  const [expandedToppingsId, setExpandedToppingsId] = useState<string | null>(null);
   const [toppingName, setToppingName] = useState("");
   const [toppingPrice, setToppingPrice] = useState("");
 
   async function loadData() {
     const catRes = await fetch("/api/categories");
     const prodRes = await fetch("/api/products");
-
     const catData = await catRes.json();
     const prodData = await prodRes.json();
-
     setCategories(catData);
     setProducts(prodData);
-
-    if (!categoryId && catData.length > 0) {
-      setCategoryId(catData[0].id);
-    }
-  }
-
-  async function handleFileSelect(file: File) {
-    setUploadError(null);
-    setIsUploading(true);
-    const result = await uploadImage(file);
-    setIsUploading(false);
-
-    if (result.error) {
-      setUploadError(result.error);
-      return;
-    }
-    setImageUrl(result.url ?? null);
-  }
-
-  async function createProduct(e: React.FormEvent) {
-    e.preventDefault();
-
-    await fetch("/api/products", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name,
-        description,
-        price,
-        categoryId,
-        availableDays: selectedDays,
-        image: imageUrl,
-      }),
-    });
-
-    setName("");
-    setDescription("");
-    setPrice("");
-    setSelectedDays([]);
-    setImageUrl(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-
-    await loadData();
-  }
-
-  async function deleteProduct(productId: string) {
-    if (!confirm("Bu ürünü silmek istediğinize emin misiniz?")) return;
-    await fetch(`/api/products/${productId}`, { method: "DELETE" });
-    await loadData();
-  }
-
-  function toggleDay(day: string) {
-    setSelectedDays((current) =>
-      current.includes(day)
-        ? current.filter((d) => d !== day)
-        : [...current, day]
-    );
   }
 
   function startEditingProduct(product: Product) {
@@ -203,9 +128,7 @@ export default function ProductsPage() {
 
   function toggleEditDay(day: string) {
     setEditSelectedDays((current) =>
-      current.includes(day)
-        ? current.filter((d) => d !== day)
-        : [...current, day]
+      current.includes(day) ? current.filter((d) => d !== day) : [...current, day]
     );
   }
 
@@ -214,7 +137,6 @@ export default function ProductsPage() {
     setEditIsUploading(true);
     const result = await uploadImage(file);
     setEditIsUploading(false);
-
     if (result.error) {
       setEditUploadError(result.error);
       return;
@@ -240,6 +162,12 @@ export default function ProductsPage() {
     });
 
     setEditingProductId(null);
+    await loadData();
+  }
+
+  async function deleteProduct(productId: string) {
+    if (!confirm("Bu ürünü silmek istediğinizden emin misiniz?")) return;
+    await fetch(`/api/products/${productId}`, { method: "DELETE" });
     await loadData();
   }
 
@@ -273,68 +201,14 @@ export default function ProductsPage() {
 
   return (
     <main className="min-h-screen bg-background text-foreground pb-12">
-      <PageHeader title="Ürünler" backHref="/admin" backLabel="Yönetim" />
+      <PageHeader
+        title="Ürünler"
+        backHref="/admin"
+        backLabel="Yönetim"
+        actionHref="/admin/products/new"
+      />
 
       <div className="px-6 pt-6">
-        <form
-          onSubmit={createProduct}
-          className="bg-surface rounded-2xl p-6 mb-10 grid gap-3 max-w-xl"
-        >
-          <ImagePicker
-            inputId="product-image-input-new"
-            imageUrl={imageUrl}
-            isUploading={isUploading}
-            error={uploadError}
-            onFileSelected={handleFileSelect}
-          />
-
-          <input
-            className="bg-surface-raised rounded-xl px-4 py-3 text-sm placeholder:text-text-muted outline-none focus:ring-2 focus:ring-menzil-green"
-            placeholder="Ürün adı"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-
-          <textarea
-            className="bg-surface-raised rounded-xl px-4 py-3 text-sm placeholder:text-text-muted outline-none focus:ring-2 focus:ring-menzil-green resize-none"
-            placeholder="Açıklama (isteğe bağlı)"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={2}
-          />
-
-          <input
-            className="bg-surface-raised rounded-xl px-4 py-3 text-sm placeholder:text-text-muted outline-none focus:ring-2 focus:ring-menzil-green"
-            placeholder="Fiyat, örn. 5.50"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            required
-          />
-
-          <select
-            className="bg-surface-raised rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-menzil-green"
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            required
-          >
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-
-          <DayPicker selectedDays={selectedDays} onToggle={toggleDay} />
-
-          <button
-            disabled={isUploading}
-            className="bg-menzil-green text-black font-semibold text-sm rounded-xl py-3 mt-1 disabled:opacity-50"
-          >
-            Ürünü kaydet
-          </button>
-        </form>
-
         <div className="grid grid-cols-2 gap-3.5 max-w-2xl">
           {products.length === 0 && (
             <p className="text-sm text-text-muted col-span-2">
@@ -396,10 +270,7 @@ export default function ProductsPage() {
                     ))}
                   </select>
 
-                  <DayPicker
-                    selectedDays={editSelectedDays}
-                    onToggle={toggleEditDay}
-                  />
+                  <DayPicker selectedDays={editSelectedDays} onToggle={toggleEditDay} />
 
                   <div className="flex gap-2 mt-1">
                     <button
@@ -440,9 +311,7 @@ export default function ProductsPage() {
                 )}
 
                 <div className="p-3.5">
-                  <div className="text-sm font-medium leading-snug">
-                    {product.name}
-                  </div>
+                  <div className="text-sm font-medium leading-snug">{product.name}</div>
                   <div className="text-xs text-text-muted mt-0.5">
                     {product.category.name} · {formatDays(product.availableDays)}
                   </div>
@@ -458,16 +327,8 @@ export default function ProductsPage() {
                         className="text-text-muted hover:text-foreground"
                         aria-label="Ürünü düzenle"
                       >
-                        <svg
-                          width="15"
-                          height="15"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
                         </svg>
                       </button>
@@ -477,16 +338,8 @@ export default function ProductsPage() {
                         className="text-text-muted hover:text-rose"
                         aria-label="Ürünü sil"
                       >
-                        <svg
-                          width="15"
-                          height="15"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6h16Z" />
                         </svg>
                       </button>
@@ -502,9 +355,7 @@ export default function ProductsPage() {
                   <button
                     type="button"
                     onClick={() =>
-                      setExpandedToppingsId(
-                        isToppingsExpanded ? null : product.id
-                      )
+                      setExpandedToppingsId(isToppingsExpanded ? null : product.id)
                     }
                     className="text-xs text-gold mt-2.5 font-medium"
                   >
@@ -516,9 +367,7 @@ export default function ProductsPage() {
                   {isToppingsExpanded && (
                     <div className="mt-3 pt-3 border-t border-border">
                       {product.toppings.length === 0 && (
-                        <p className="text-xs text-text-muted mb-3">
-                          Henüz ek malzeme yok.
-                        </p>
+                        <p className="text-xs text-text-muted mb-3">Henüz ek malzeme yok.</p>
                       )}
 
                       <div className="space-y-1.5 mb-3">
@@ -532,7 +381,7 @@ export default function ProductsPage() {
                               <span className="text-sm text-text-muted">
                                 {topping.price > 0
                                   ? `+${topping.price.toFixed(2)} €`
-                                  : "ücretsiz"}
+                                  : "ucretsiz"}
                               </span>
                               <button
                                 type="button"
@@ -540,15 +389,8 @@ export default function ProductsPage() {
                                 className="text-text-muted hover:text-rose"
                                 aria-label="Ek malzemeyi sil"
                               >
-                                <svg
-                                  width="14"
-                                  height="14"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                  stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                                   <path d="M18 6 6 18M6 6l12 12" />
                                 </svg>
                               </button>
@@ -557,10 +399,7 @@ export default function ProductsPage() {
                         ))}
                       </div>
 
-                      <form
-                        onSubmit={(e) => addTopping(product.id, e)}
-                        className="flex gap-2"
-                      >
+                      <form onSubmit={(e) => addTopping(product.id, e)} className="flex gap-2">
                         <input
                           className="bg-surface-raised rounded-lg px-3 py-2 text-sm flex-1 outline-none focus:ring-2 focus:ring-menzil-green"
                           placeholder="Ek malzeme, örn. Ekstra Peynir"
