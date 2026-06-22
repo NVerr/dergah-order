@@ -73,8 +73,8 @@ export async function printOrder(order: PrintableOrder): Promise<boolean> {
     printer.newLine();
     printer.drawLine();
     printer.alignCenter();
-    printer.println("Siparisiniz hazir oldugunda");
-    printer.println("lütfen Zili calarak haber verin.");
+    printer.println("Siparis hazir oldugunda");
+    printer.println("lütfen zili calarak haber verin.");
     printer.newLine();
 
     printer.cut();

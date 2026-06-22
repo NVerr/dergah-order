@@ -640,15 +640,8 @@ export default function OrderClient({
         className="fixed bottom-0 left-0 right-0 text-center text-xs py-1 z-10"
         style={{ color: "var(--text-muted)", background: "var(--bg)" }}
       >
-        
-          <a href="https://www.rosewater-it.de"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:underline"
-          style={{ color: "var(--text-muted)" }}
-        >
-          Powered by rosewater-it.de
-        </a>
+        <span>Niyetimiz Hizmet, Hedefimiz Gayret.</span>
+        <span className="block">Mevlana Gavs-i Nizam (k.s.)</span>
       </footer>
     </main>
   );
