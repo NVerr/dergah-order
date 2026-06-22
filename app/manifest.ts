@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Dergah yemek sipariş sistemi",
     start_url: "/",
     display: "standalone",
-    background_color: "#0f172a",
-    theme_color: "#0f172a",
+    background_color: "#ffffff",
+    theme_color: "#2f9e5c",
     orientation: "portrait",
     icons: [
       {
