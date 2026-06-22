@@ -21,19 +21,14 @@ export async function POST(req: Request) {
 
   const products = await prisma.product.findMany({
     where: {
-      id: {
-        in: items.map((item) => item.productId),
-      },
+      id: { in: items.map((item) => item.productId) },
       active: true,
     },
   });
 
   const orderItems = items.map((item) => {
     const product = products.find((p: { id: string }) => p.id === item.productId);
-
-    if (!product) {
-      throw new Error("Ürün bulunamadı.");
-    }
+    if (!product) throw new Error("Ürün bulunamadı.");
 
     const toppings = item.toppings ?? [];
     const toppingsTotal = toppings.reduce((sum, t) => sum + t.price, 0);
@@ -52,13 +47,19 @@ export async function POST(req: Request) {
     0
   );
 
-  const lastOrder = await prisma.order.findFirst({
-    orderBy: {
-      orderNumber: "desc",
+  // ── Punkt 4: Bestellnummer täglich zurücksetzen ──
+  // Wir suchen die letzte Bestellung, die heute erstellt wurde.
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const lastOrderToday = await prisma.order.findFirst({
+    where: {
+      createdAt: { gte: todayStart },
     },
+    orderBy: { orderNumber: "desc" },
   });
 
-  const nextOrderNumber = lastOrder ? lastOrder.orderNumber + 1 : 1;
+  const nextOrderNumber = lastOrderToday ? lastOrderToday.orderNumber + 1 : 1;
 
   const order = await prisma.order.create({
     data: {
@@ -69,14 +70,10 @@ export async function POST(req: Request) {
         create: orderItems,
       },
     },
-    include: {
-      items: true,
-    },
+    include: { items: true },
   });
 
-  // Druck im Hintergrund anstoßen: der Besucher soll nicht auf den
-  // Druckvorgang warten müssen, und ein Druckfehler darf die Bestellung
-  // (die bereits sicher in der Datenbank liegt) nicht gefährden.
+  // Druck im Hintergrund anstoßen
   printOrder({
     orderNumber: order.orderNumber,
     items: order.items.map(
@@ -102,12 +99,8 @@ export async function GET(req: Request) {
 
   const orders = await prisma.order.findMany({
     where: statuses ? { status: { in: statuses } } : undefined,
-    include: {
-      items: true,
-    },
-    orderBy: {
-      createdAt: "asc",
-    },
+    include: { items: true },
+    orderBy: { createdAt: "asc" },
   });
 
   return Response.json(orders);

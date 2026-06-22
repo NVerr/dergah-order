@@ -68,7 +68,14 @@ export async function printOrder(order: PrintableOrder): Promise<boolean> {
       }
     }
 
+    // ── Punkt 4: Türkischer Hinweistext am Ende des Bons ──
     printer.newLine();
+    printer.drawLine();
+    printer.alignCenter();
+    printer.println("Siparisiniz hazir oldigunda");
+    printer.println("lutfen zili calarak haber verin.");
+    printer.newLine();
+
     printer.cut();
 
     await printer.execute();
