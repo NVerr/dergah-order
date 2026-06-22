@@ -11,6 +11,7 @@ export async function PATCH(
     where: { id },
     data: {
       name: body.name,
+      image: body.image ?? undefined,
     },
   });
 

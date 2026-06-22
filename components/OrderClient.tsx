@@ -51,10 +51,21 @@ const WEEKDAY_BY_INDEX = [
   "SATURDAY",
 ];
 
-function isAvailableToday(product: Product): boolean {
+const WEEKDAY_OPTIONS: { value: string; label: string }[] = [
+  { value: "ALL", label: "Her gün" },
+  { value: "MONDAY", label: "Pzt" },
+  { value: "TUESDAY", label: "Sal" },
+  { value: "WEDNESDAY", label: "Çar" },
+  { value: "THURSDAY", label: "Per" },
+  { value: "FRIDAY", label: "Cum" },
+  { value: "SATURDAY", label: "Cmt" },
+  { value: "SUNDAY", label: "Paz" },
+];
+
+function isAvailableOnDay(product: Product, day: string): boolean {
+  if (day === "ALL") return true;
   if (!product.availableDays) return true;
-  const today = WEEKDAY_BY_INDEX[new Date().getDay()];
-  return product.availableDays.split(",").includes(today);
+  return product.availableDays.split(",").includes(day);
 }
 
 function buildCartItemId(productId: string, toppings: SelectedTopping[]) {
@@ -70,8 +81,9 @@ export default function OrderClient({
 }: {
   initialProducts: Product[];
 }) {
-  const [products] = useState<Product[]>(
-    initialProducts.filter(isAvailableToday)
+  const [products] = useState<Product[]>(initialProducts);
+  const [selectedDay, setSelectedDay] = useState<string>(
+    WEEKDAY_BY_INDEX[new Date().getDay()]
   );
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orderNumber, setOrderNumber] = useState<number | null>(null);
@@ -84,13 +96,36 @@ export default function OrderClient({
     Set<string>
   >(new Set());
 
+  const productsForDay = products.filter((p) =>
+    isAvailableOnDay(p, selectedDay)
+  );
+
   const categories = Array.from(
-    new Map(products.map((p) => [p.category.id, p.category])).values()
+    new Map(productsForDay.map((p) => [p.category.id, p.category])).values()
   );
 
   const [activeCategory, setActiveCategory] = useState<string | null>(
     categories[0]?.id ?? null
   );
+
+  function handleDayChange(day: string) {
+    setSelectedDay(day);
+
+    const stillAvailable = products.some(
+      (p) => isAvailableOnDay(p, day) && p.category.id === activeCategory
+    );
+
+    if (!stillAvailable) {
+      const firstCategoryForDay = Array.from(
+        new Map(
+          products
+            .filter((p) => isAvailableOnDay(p, day))
+            .map((p) => [p.category.id, p.category])
+        ).values()
+      )[0];
+      setActiveCategory(firstCategoryForDay?.id ?? null);
+    }
+  }
 
   function addToCart(
     product: Product,
@@ -295,7 +330,27 @@ export default function OrderClient({
         </a>
       </header>
 
-      <nav className="flex gap-2.5 px-6 pt-5 pb-1 overflow-x-auto [scrollbar-width:none]">
+      <div className="flex gap-1.5 px-6 pt-5 overflow-x-auto [scrollbar-width:none]">
+        {WEEKDAY_OPTIONS.map((day) => {
+          const isActive = day.value === selectedDay;
+          return (
+            <button
+              key={day.value}
+              type="button"
+              onClick={() => handleDayChange(day.value)}
+              className={`px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
+                isActive
+                  ? "bg-menzil-green text-menzil-green-deep"
+                  : "bg-surface text-text-muted"
+              }`}
+            >
+              {day.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <nav className="flex gap-2.5 px-6 pt-3 pb-1 overflow-x-auto [scrollbar-width:none]">
         {categories.map((category) => {
           const isActive = category.id === activeCategory;
           return (
@@ -315,14 +370,14 @@ export default function OrderClient({
         })}
       </nav>
 
-      {products.length === 0 && (
+      {productsForDay.length === 0 && (
         <p className="px-6 pt-10 text-text-muted text-sm">
-          Bugün menüde ürün bulunmuyor.
+          Bu gün için menüde ürün bulunmuyor.
         </p>
       )}
 
       <section className="px-6 pt-5 grid grid-cols-2 gap-3.5">
-        {products
+        {productsForDay
           .filter((p) => p.category.id === activeCategory)
           .map((product) => (
             <button

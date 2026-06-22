@@ -10,6 +10,7 @@ datasource db {
 model Category {
   id        String    @id @default(cuid())
   name      String
+  image     String?
   sortOrder Int       @default(0)
   active    Boolean   @default(true)
 

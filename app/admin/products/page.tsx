@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import PageHeader from "@/components/PageHeader";
+import ImagePicker, { uploadImage } from "@/components/ImagePicker";
 
 type Category = {
   id: string;
@@ -45,6 +46,41 @@ function formatDays(availableDays: string | null): string {
     .join(", ");
 }
 
+function DayPicker({
+  selectedDays,
+  onToggle,
+}: {
+  selectedDays: string[];
+  onToggle: (day: string) => void;
+}) {
+  return (
+    <div>
+      <div className="text-xs text-text-muted mb-2">
+        Hangi günler (boş bırakılırsa her gün)
+      </div>
+      <div className="flex gap-1.5 flex-wrap">
+        {WEEKDAYS.map((day) => {
+          const isSelected = selectedDays.includes(day.value);
+          return (
+            <button
+              type="button"
+              key={day.value}
+              onClick={() => onToggle(day.value)}
+              className={`px-3.5 py-2 rounded-lg text-xs font-medium ${
+                isSelected
+                  ? "bg-menzil-green text-menzil-green-deep"
+                  : "bg-surface-raised text-text-muted"
+              }`}
+            >
+              {day.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function ProductsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -59,7 +95,19 @@ export default function ProductsPage() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [expandedProductId, setExpandedProductId] = useState<string | null>(
+  const [editingProductId, setEditingProductId] = useState<string | null>(
+    null
+  );
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+  const [editCategoryId, setEditCategoryId] = useState("");
+  const [editSelectedDays, setEditSelectedDays] = useState<string[]>([]);
+  const [editImageUrl, setEditImageUrl] = useState<string | null>(null);
+  const [editIsUploading, setEditIsUploading] = useState(false);
+  const [editUploadError, setEditUploadError] = useState<string | null>(null);
+
+  const [expandedToppingsId, setExpandedToppingsId] = useState<string | null>(
     null
   );
   const [toppingName, setToppingName] = useState("");
@@ -80,31 +128,17 @@ export default function ProductsPage() {
     }
   }
 
-  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  async function handleFileSelect(file: File) {
     setUploadError(null);
     setIsUploading(true);
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
-
+    const result = await uploadImage(file);
     setIsUploading(false);
 
-    if (!res.ok) {
-      const data = await res.json().catch(() => null);
-      setUploadError(data?.error ?? "Fotoğraf yüklenemedi.");
+    if (result.error) {
+      setUploadError(result.error);
       return;
     }
-
-    const data = await res.json();
-    setImageUrl(data.url);
+    setImageUrl(result.url ?? null);
   }
 
   async function createProduct(e: React.FormEvent) {
@@ -149,6 +183,66 @@ export default function ProductsPage() {
     );
   }
 
+  function startEditingProduct(product: Product) {
+    setExpandedToppingsId(null);
+    setEditingProductId(product.id);
+    setEditName(product.name);
+    setEditDescription(product.description ?? "");
+    setEditPrice(String(product.price));
+    setEditCategoryId(product.category.id);
+    setEditSelectedDays(
+      product.availableDays ? product.availableDays.split(",") : []
+    );
+    setEditImageUrl(product.image);
+    setEditUploadError(null);
+  }
+
+  function cancelEditingProduct() {
+    setEditingProductId(null);
+  }
+
+  function toggleEditDay(day: string) {
+    setEditSelectedDays((current) =>
+      current.includes(day)
+        ? current.filter((d) => d !== day)
+        : [...current, day]
+    );
+  }
+
+  async function handleEditFileSelect(file: File) {
+    setEditUploadError(null);
+    setEditIsUploading(true);
+    const result = await uploadImage(file);
+    setEditIsUploading(false);
+
+    if (result.error) {
+      setEditUploadError(result.error);
+      return;
+    }
+    setEditImageUrl(result.url ?? null);
+  }
+
+  async function saveEditingProduct(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingProductId) return;
+
+    await fetch(`/api/products/${editingProductId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: editName,
+        description: editDescription,
+        price: editPrice,
+        categoryId: editCategoryId,
+        availableDays: editSelectedDays,
+        image: editImageUrl,
+      }),
+    });
+
+    setEditingProductId(null);
+    await loadData();
+  }
+
   async function addTopping(productId: string, e: React.FormEvent) {
     e.preventDefault();
     if (!toppingName.trim()) return;
@@ -186,51 +280,13 @@ export default function ProductsPage() {
           onSubmit={createProduct}
           className="bg-surface rounded-2xl p-6 mb-10 grid gap-3 max-w-xl"
         >
-          <div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={handleFileSelect}
-              className="hidden"
-              id="product-image-input"
-            />
-            <label
-              htmlFor="product-image-input"
-              className="block aspect-[16/9] rounded-xl bg-surface-raised border border-dashed border-border overflow-hidden cursor-pointer relative"
-            >
-              {imageUrl ? (
-                <Image
-                  src={imageUrl}
-                  alt=""
-                  fill
-                  sizes="400px"
-                  className="object-cover"
-                />
-              ) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-text-muted">
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                  >
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="9" cy="9" r="2" />
-                    <path d="m21 15-5-5L5 21" />
-                  </svg>
-                  <span className="text-xs">
-                    {isUploading ? "Yükleniyor…" : "Fotoğraf ekle"}
-                  </span>
-                </div>
-              )}
-            </label>
-            {uploadError && (
-              <p className="text-xs text-rose mt-2">{uploadError}</p>
-            )}
-          </div>
+          <ImagePicker
+            inputId="product-image-input-new"
+            imageUrl={imageUrl}
+            isUploading={isUploading}
+            error={uploadError}
+            onFileSelected={handleFileSelect}
+          />
 
           <input
             className="bg-surface-raised rounded-xl px-4 py-3 text-sm placeholder:text-text-muted outline-none focus:ring-2 focus:ring-menzil-green"
@@ -269,30 +325,7 @@ export default function ProductsPage() {
             ))}
           </select>
 
-          <div>
-            <div className="text-xs text-text-muted mb-2">
-              Hangi günler (boş bırakılırsa her gün)
-            </div>
-            <div className="flex gap-1.5 flex-wrap">
-              {WEEKDAYS.map((day) => {
-                const isSelected = selectedDays.includes(day.value);
-                return (
-                  <button
-                    type="button"
-                    key={day.value}
-                    onClick={() => toggleDay(day.value)}
-                    className={`px-3.5 py-2 rounded-lg text-xs font-medium ${
-                      isSelected
-                        ? "bg-menzil-green text-menzil-green-deep"
-                        : "bg-surface-raised text-text-muted"
-                    }`}
-                  >
-                    {day.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <DayPicker selectedDays={selectedDays} onToggle={toggleDay} />
 
           <button
             disabled={isUploading}
@@ -302,46 +335,142 @@ export default function ProductsPage() {
           </button>
         </form>
 
-        <div className="grid gap-3 max-w-xl">
+        <div className="grid grid-cols-2 gap-3.5 max-w-2xl">
           {products.length === 0 && (
-            <p className="text-sm text-text-muted">Henüz ürün eklenmedi.</p>
+            <p className="text-sm text-text-muted col-span-2">
+              Henüz ürün eklenmedi.
+            </p>
           )}
 
           {products.map((product) => {
-            const isExpanded = expandedProductId === product.id;
+            const isEditing = editingProductId === product.id;
+            const isToppingsExpanded = expandedToppingsId === product.id;
+
+            if (isEditing) {
+              return (
+                <form
+                  key={product.id}
+                  onSubmit={saveEditingProduct}
+                  className="bg-surface rounded-2xl p-4 grid gap-3 border border-menzil-green/40 col-span-2"
+                >
+                  <ImagePicker
+                    inputId={`product-image-input-edit-${product.id}`}
+                    imageUrl={editImageUrl}
+                    isUploading={editIsUploading}
+                    error={editUploadError}
+                    onFileSelected={handleEditFileSelect}
+                  />
+
+                  <input
+                    className="bg-surface-raised rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-menzil-green"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    required
+                  />
+
+                  <textarea
+                    className="bg-surface-raised rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-menzil-green resize-none"
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    rows={2}
+                    placeholder="Açıklama (isteğe bağlı)"
+                  />
+
+                  <input
+                    className="bg-surface-raised rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-menzil-green"
+                    value={editPrice}
+                    onChange={(e) => setEditPrice(e.target.value)}
+                    required
+                  />
+
+                  <select
+                    className="bg-surface-raised rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-menzil-green"
+                    value={editCategoryId}
+                    onChange={(e) => setEditCategoryId(e.target.value)}
+                    required
+                  >
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <DayPicker
+                    selectedDays={editSelectedDays}
+                    onToggle={toggleEditDay}
+                  />
+
+                  <div className="flex gap-2 mt-1">
+                    <button
+                      type="button"
+                      onClick={cancelEditingProduct}
+                      className="flex-1 bg-surface-raised text-sm font-medium rounded-xl py-3"
+                    >
+                      Vazgeç
+                    </button>
+                    <button
+                      disabled={editIsUploading}
+                      className="flex-1 bg-menzil-green text-menzil-green-deep font-semibold text-sm rounded-xl py-3 disabled:opacity-50"
+                    >
+                      Kaydet
+                    </button>
+                  </div>
+                </form>
+              );
+            }
 
             return (
               <div
                 key={product.id}
-                className="bg-surface rounded-2xl overflow-hidden"
+                className={`bg-surface rounded-2xl overflow-hidden ${
+                  isToppingsExpanded ? "col-span-2" : ""
+                }`}
               >
                 {product.image && (
-                  <div className="aspect-[16/9] relative bg-surface-raised">
+                  <div className="aspect-[6/5] relative bg-surface-raised">
                     <Image
                       src={product.image}
                       alt={product.name}
                       fill
-                      sizes="500px"
+                      sizes="(max-width: 640px) 50vw, 300px"
                       className="object-cover"
                     />
                   </div>
                 )}
 
-                <div className="p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="text-base font-medium">
-                        {product.name}
-                      </div>
-                      <div className="text-xs text-text-muted mt-0.5">
-                        {product.category.name} ·{" "}
-                        {formatDays(product.availableDays)}
-                      </div>
+                <div className="p-3.5">
+                  <div className="text-sm font-medium leading-snug">
+                    {product.name}
+                  </div>
+                  <div className="text-xs text-text-muted mt-0.5">
+                    {product.category.name} · {formatDays(product.availableDays)}
+                  </div>
+
+                  <div className="flex items-center justify-between mt-2.5">
+                    <div className="text-sm font-semibold text-rose">
+                      {product.price.toFixed(2)} €
                     </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      <div className="text-base font-semibold text-rose">
-                        {product.price.toFixed(2)} €
-                      </div>
+                    <div className="flex items-center gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => startEditingProduct(product)}
+                        className="text-text-muted hover:text-foreground"
+                        aria-label="Ürünü düzenle"
+                      >
+                        <svg
+                          width="15"
+                          height="15"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                        </svg>
+                      </button>
                       <button
                         type="button"
                         onClick={() => deleteProduct(product.id)}
@@ -349,8 +478,8 @@ export default function ProductsPage() {
                         aria-label="Ürünü sil"
                       >
                         <svg
-                          width="16"
-                          height="16"
+                          width="15"
+                          height="15"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
@@ -365,7 +494,7 @@ export default function ProductsPage() {
                   </div>
 
                   {product.description && (
-                    <div className="text-sm text-text-muted mt-2">
+                    <div className="text-xs text-text-muted mt-2 line-clamp-2">
                       {product.description}
                     </div>
                   )}
@@ -373,16 +502,18 @@ export default function ProductsPage() {
                   <button
                     type="button"
                     onClick={() =>
-                      setExpandedProductId(isExpanded ? null : product.id)
+                      setExpandedToppingsId(
+                        isToppingsExpanded ? null : product.id
+                      )
                     }
-                    className="text-xs text-gold mt-3 font-medium"
+                    className="text-xs text-gold mt-2.5 font-medium"
                   >
-                    {isExpanded
-                      ? "Ek malzemeleri gizle"
-                      : `Ek malzemeleri yönet (${product.toppings.length})`}
+                    {isToppingsExpanded
+                      ? "Gizle"
+                      : `Ek malzemeler (${product.toppings.length})`}
                   </button>
 
-                  {isExpanded && (
+                  {isToppingsExpanded && (
                     <div className="mt-3 pt-3 border-t border-border">
                       {product.toppings.length === 0 && (
                         <p className="text-xs text-text-muted mb-3">
