@@ -30,7 +30,7 @@ function DayPicker({
   return (
     <div>
       <div className="text-xs text-text-muted mb-2">
-        Hangi gunler (bos birakilirsa her gun)
+        Hangi günler? (Boş bırakılırsa her gün seçilir.)
       </div>
       <div className="flex gap-1.5 flex-wrap">
         {WEEKDAYS.map((day) => {
@@ -120,9 +120,9 @@ export default function NewProductPage() {
   return (
     <main className="min-h-screen bg-background text-foreground pb-12">
       <PageHeader
-        title="Yeni Urun"
+        title="Yeni Ürün"
         backHref="/admin/products"
-        backLabel="Urunler"
+        backLabel="Ürünler"
       />
 
       <div className="px-6 pt-6">
@@ -137,7 +137,7 @@ export default function NewProductPage() {
 
           <input
             className="bg-surface-raised rounded-xl px-4 py-3 text-sm placeholder:text-text-muted outline-none focus:ring-2 focus:ring-menzil-green"
-            placeholder="Urun adi"
+            placeholder="Ürün adı"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -145,7 +145,7 @@ export default function NewProductPage() {
 
           <textarea
             className="bg-surface-raised rounded-xl px-4 py-3 text-sm placeholder:text-text-muted outline-none focus:ring-2 focus:ring-menzil-green resize-none"
-            placeholder="Aciklama (istege bagli)"
+            placeholder="Açıklama (isteğe bağlı))"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
@@ -178,7 +178,7 @@ export default function NewProductPage() {
             disabled={isUploading || isSaving}
             className="bg-menzil-green text-black font-semibold text-sm rounded-xl py-3 mt-1 disabled:opacity-50"
           >
-            {isSaving ? "Kaydediliyor..." : "Urunu kaydet"}
+            {isSaving ? "Kaydediliyor..." : "Ürünü kaydet"}
           </button>
         </form>
       </div>
