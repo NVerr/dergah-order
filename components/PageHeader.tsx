@@ -1,5 +1,6 @@
 import Image from "next/image";
 import ThemeToggle from "@/components/ThemeToggle";
+import LogoutButton from "@/components/LogoutButton";
 
 export default function PageHeader({
   title,
@@ -7,12 +8,14 @@ export default function PageHeader({
   backHref,
   backLabel,
   actionHref,
+  showLogout,
 }: {
   title: string;
   subtitle?: string;
   backHref?: string;
   backLabel?: string;
   actionHref?: string;
+  showLogout?: boolean;
 }) {
   return (
     <header className="px-6 pt-6">
@@ -54,6 +57,7 @@ export default function PageHeader({
           )}
         </div>
         <ThemeToggle />
+        {showLogout && <LogoutButton />}
         
         {actionHref && (
           <a

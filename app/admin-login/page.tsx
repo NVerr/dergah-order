@@ -87,7 +87,7 @@ export default function AdminLoginPage() {
         <button
           type="submit"
           disabled={isSubmitting || password.length === 0}
-          className="bg-menzil-green text-menzil-green-deep font-semibold text-sm rounded-xl py-3 w-full disabled:opacity-50"
+          className="bg-menzil-green text-black font-semibold text-sm rounded-xl py-3 w-full disabled:opacity-50"
         >
           {isSubmitting ? "Kontrol ediliyor…" : "Giriş yap"}
         </button>

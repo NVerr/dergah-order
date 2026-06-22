@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Dergah Sipariş",
     short_name: "Dergah",
-    description: "Cami yemek sipariş sistemi",
+    description: "Dergah yemek sipariş sistemi",
     start_url: "/",
     display: "standalone",
     background_color: "#0f172a",

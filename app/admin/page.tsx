@@ -9,10 +9,8 @@ export default function AdminPage() {
         subtitle="Duisburg-Menzil"
         backHref="/"
         backLabel="Sipariş sayfası"
+        showLogout
       />
-      <div className="flex justify-end px-6 pt-3">
-        <LogoutButton />
-      </div>
       
       <div className="grid grid-cols-2 gap-3.5 px-6 pt-6 max-w-2xl">
         <a
