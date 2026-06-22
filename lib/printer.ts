@@ -53,7 +53,7 @@ export async function printOrder(order: PrintableOrder): Promise<boolean> {
     printer.alignCenter();
     printer.setTextSize(1, 1);
     printer.bold(true);
-    printer.println("Sipariş");
+    printer.println("Siparis");
     printer.setTextSize(3, 3);
     printer.println(String(order.orderNumber));
     printer.setTextSize(0, 0);
@@ -72,8 +72,8 @@ export async function printOrder(order: PrintableOrder): Promise<boolean> {
     printer.newLine();
     printer.drawLine();
     printer.alignCenter();
-    printer.println("Siparisiniz hazir oldigunda");
-    printer.println("lutfen zili calarak haber verin.");
+    printer.println("Siparisiniz hazir oldugunda");
+    printer.println("lütfen Zili calarak haber verin.");
     printer.newLine();
 
     printer.cut();

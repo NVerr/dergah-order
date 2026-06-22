@@ -151,7 +151,7 @@ export default function CategoriesPage() {
 
           <button
             disabled={isUploading}
-            className="bg-menzil-green text-menzil-green-deep font-semibold text-sm rounded-xl py-3 disabled:opacity-50"
+            className="bg-menzil-green font-semibold text-sm rounded-xl py-3 disabled:opacity-50" style={{ color: "#000000" }}
           >
             Kaydet
           </button>
@@ -203,7 +203,7 @@ export default function CategoriesPage() {
                       type="button"
                       onClick={() => saveEditing(cat.id)}
                       disabled={editIsUploading}
-                      className="flex-1 bg-menzil-green text-menzil-green-deep text-xs font-semibold rounded-lg py-2.5 disabled:opacity-50"
+                      className="flex-1 bg-menzil-green text-xs font-semibold rounded-lg py-2.5 disabled:opacity-50" style={{ color: "#000000" }}
                     >
                       Kaydet
                     </button>

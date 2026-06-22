@@ -533,7 +533,7 @@ export default function OrderClient({
 
       {/* ── Warenkorb ── */}
       {cart.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 p-3.5 pt-8"
+        <div className="fixed bottom-5 left-0 right-0 p-3.5 pt-8"
           style={{ background: "linear-gradient(to top, var(--bg) 70%, transparent)" }}>
           <div className="rounded-2xl p-4 max-w-2xl mx-auto" style={{ background: "var(--surface)" }}>
             <div className="max-h-40 overflow-y-auto space-y-3 mb-3">
@@ -632,9 +632,13 @@ export default function OrderClient({
       )}
 
       {/* ── Punkt 6: Footer mit Werbung ── */}
-      <footer className="mt-16 pb-4 text-center text-xs" style={{ color: "var(--text-muted)" }}>
-        <a
-          href="https://www.rosewater-it.de"
+{/* ── Punkt 6: Footer mit Werbung – immer ganz unten ── */}
+      <footer
+        className="fixed bottom-0 left-0 right-0 text-center text-xs py-1 z-10"
+        style={{ color: "var(--text-muted)", background: "var(--bg)" }}
+      >
+        
+          <a href="https://www.rosewater-it.de"
           target="_blank"
           rel="noopener noreferrer"
           className="hover:underline"

@@ -68,7 +68,7 @@ function DayPicker({
               onClick={() => onToggle(day.value)}
               className={`px-3.5 py-2 rounded-lg text-xs font-medium ${
                 isSelected
-                  ? "bg-menzil-green text-menzil-green-deep"
+                  ? "bg-menzil-green text-black"
                   : "bg-surface-raised text-text-muted"
               }`}
             >
@@ -329,7 +329,7 @@ export default function ProductsPage() {
 
           <button
             disabled={isUploading}
-            className="bg-menzil-green text-menzil-green-deep font-semibold text-sm rounded-xl py-3 mt-1 disabled:opacity-50"
+            className="bg-menzil-green text-black font-semibold text-sm rounded-xl py-3 mt-1 disabled:opacity-50"
           >
             Ürünü kaydet
           </button>
@@ -411,7 +411,7 @@ export default function ProductsPage() {
                     </button>
                     <button
                       disabled={editIsUploading}
-                      className="flex-1 bg-menzil-green text-menzil-green-deep font-semibold text-sm rounded-xl py-3 disabled:opacity-50"
+                      className="flex-1 bg-menzil-green text-black font-semibold text-sm rounded-xl py-3 disabled:opacity-50"
                     >
                       Kaydet
                     </button>

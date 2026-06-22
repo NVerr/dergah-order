@@ -151,8 +151,7 @@ export default function KitchenPage() {
 
             <button
               onClick={() => updateStatus(order, "DONE")}
-              className="bg-menzil-green text-menzil-green-deep text-sm font-semibold rounded-xl py-3"
-            >
+              className="bg-menzil-green text-sm font-semibold rounded-xl py-3" style={{ color: "#000000" }}            >
               Hazır
             </button>
           </div>
