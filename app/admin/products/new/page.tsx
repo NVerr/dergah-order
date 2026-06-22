@@ -13,7 +13,7 @@ type Category = {
 const WEEKDAYS: { value: string; label: string }[] = [
   { value: "MONDAY", label: "Pzt" },
   { value: "TUESDAY", label: "Sal" },
-  { value: "WEDNESDAY", label: "Car" },
+  { value: "WEDNESDAY", label: "Çar" },
   { value: "THURSDAY", label: "Per" },
   { value: "FRIDAY", label: "Cum" },
   { value: "SATURDAY", label: "Cmt" },
@@ -148,19 +148,20 @@ export default function NewProductPage() {
             placeholder="Açıklama (isteğe bağlı))"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            rows={2}
+            rows={1}
           />
 
           <input
             className="bg-surface-raised rounded-xl px-4 py-3 text-sm placeholder:text-text-muted outline-none focus:ring-2 focus:ring-menzil-green"
-            placeholder="Fiyat, orn. 5.50"
+            placeholder="Fiyat, örn. 5.50"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             required
           />
 
           <select
-            className="bg-surface-raised rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-menzil-green"
+            className="bg-surface-raised rounded-xl px-4 text-sm outline-none focus:ring-2 focus:ring-menzil-green w-full"
+            style={{ height: "44px" }}
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
             required
